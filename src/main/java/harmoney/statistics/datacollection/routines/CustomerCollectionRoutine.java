@@ -10,8 +10,8 @@ import org.apache.http.HttpResponse;
 public class CustomerCollectionRoutine extends MoneyBoxGet{
 	
 	private int accountId;
-	public CustomerCollectionRoutine(String userName,String sessionId,Integer accountId){
-		super(userName,sessionId);
+	public CustomerCollectionRoutine(String userName,String sessionId,Integer accountId,int port){
+		super(userName,sessionId,port);
 		this.accountId = accountId;
 	}
 	
@@ -32,5 +32,7 @@ public class CustomerCollectionRoutine extends MoneyBoxGet{
 		is.close();
 		return buffer;
 	}
+
+	
 
 }

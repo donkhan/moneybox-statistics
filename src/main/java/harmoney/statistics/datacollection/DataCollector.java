@@ -4,8 +4,10 @@ import harmoney.statistics.datacollection.routines.CounterTransactionsRetrievalR
 import harmoney.statistics.datacollection.routines.CustomerCollectionRoutine;
 import harmoney.statistics.datacollection.routines.MoneyBoxLogin;
 import harmoney.statistics.model.CounterTransaction;
+import harmoney.statistics.model.Credentials;
 import harmoney.statistics.model.Customer;
 import harmoney.statistics.repository.CounterTransactionRepository;
+import harmoney.statistics.repository.CredentialsRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +37,9 @@ public class DataCollector {
 	@Resource
 	private CounterTransactionRepository cdsRepository;
 
+	@Resource
+	private CredentialsRepository credentialsRepository;
+	 
     public void takeBackup(){
     	Calendar yesterday = new GregorianCalendar();
     	yesterday.set(Calendar.MILLISECOND, 0);
@@ -45,10 +50,12 @@ public class DataCollector {
     
     	Calendar fourYearsBack = (GregorianCalendar)yesterday.clone();
     	fourYearsBack.add(Calendar.YEAR,-4);
-    	MoneyBoxLogin mBox = new MoneyBoxLogin("sadmin","");
+    	
+    	Credentials credentials = getCredentials();
+    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
 		try {
 			String sessionId = mBox.login();
-			runBackUp(fourYearsBack,yesterday,sessionId);
+			runBackUp(fourYearsBack,yesterday,sessionId,credentials.getPort());
 		} catch (ClientProtocolException e) {
 			logger.error("",e);
 
@@ -58,16 +65,17 @@ public class DataCollector {
 		
     }
     
-    private void runBackUp(Calendar fourYearsBack, Calendar yesterday,String sessionId){
+    private void runBackUp(Calendar fourYearsBack, Calendar yesterday,String sessionId,int port){
     	while(fourYearsBack.before(yesterday)){
-    		collectCounterTransactions(fourYearsBack.getTimeInMillis(),fourYearsBack.getTimeInMillis() + 24*60*60*1000-1,sessionId);
+    		collectCounterTransactions(fourYearsBack.getTimeInMillis(),fourYearsBack.getTimeInMillis() + 24*60*60*1000-1,sessionId,port);
     		fourYearsBack.add(Calendar.DATE, 1);
     	}
     }
     
     @Scheduled(cron = "0 0 4 * * ?")
     public void startDailyCollector(){
-    	MoneyBoxLogin mBox = new MoneyBoxLogin("sadmin","");
+    	Credentials credentials = getCredentials();
+    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
     	Calendar calendar = new GregorianCalendar();
     	try {
     		String sessionId = mBox.login();
@@ -76,7 +84,7 @@ public class DataCollector {
 			calendar.set(Calendar.MINUTE,0);
 			calendar.set(Calendar.HOUR_OF_DAY,0);
 			calendar.add(Calendar.DATE,-1);
-			collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId);
+			collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId,credentials.getPort());
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -86,12 +94,12 @@ public class DataCollector {
 
     final Logger logger = LoggerFactory.getLogger(DataCollector.class);
     
-    public void collectCounterTransactions(long st,long en,String sessionId){
+    public void collectCounterTransactions(long st,long en,String sessionId,int port){
     	logger.info("Start {} End {} ", new Date(st), new Date(en));
     	
     	try {
 			CounterTransactionsRetrievalRoutine routine = 
-					new CounterTransactionsRetrievalRoutine("sadmin",sessionId);
+					new CounterTransactionsRetrievalRoutine("sadmin",sessionId,port);
 			routine.setEn(en);
 			routine.setSt(st);
 			HttpResponse response = routine.execute();
@@ -100,7 +108,7 @@ public class DataCollector {
 			JSONObject data = (JSONObject)object.get("data");
 			JSONArray content = (JSONArray)data.get("content");
 			logger.info("Collection for {} Data Size {} ",new Date(st) , content.length());
-			prepareStatistics(content,collectCustomers(collectAccountIds(content),sessionId),st);
+			prepareStatistics(content,collectCustomers(collectAccountIds(content),sessionId,port),st);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -143,10 +151,10 @@ public class DataCollector {
 		return accountIds;
 	}
 
-	private Map<Integer,Customer> collectCustomers(Set<Integer> accountIds,String sessionId) {
+	private Map<Integer,Customer> collectCustomers(Set<Integer> accountIds,String sessionId,int port) {
 		Map<Integer,Customer> customers = new HashMap<Integer,Customer>();
 		for(Integer accountId : accountIds){
-			CustomerCollectionRoutine routine = new CustomerCollectionRoutine("sadmin",sessionId,accountId);
+			CustomerCollectionRoutine routine = new CustomerCollectionRoutine("sadmin",sessionId,accountId,port);
 			try {
 				HttpResponse response = routine.execute();
 				StringBuffer buffer = routine.getContent(response);
@@ -180,4 +188,49 @@ public class DataCollector {
 		return customers;
 		
 	}
+
+	public void checkAndCollectForToday(long from, long to) {
+		GregorianCalendar today = new GregorianCalendar();
+		today.set(Calendar.MILLISECOND, 0);
+		today.set(Calendar.SECOND,0);
+		today.set(Calendar.MINUTE,0);
+		today.set(Calendar.HOUR_OF_DAY,0);
+		
+		long todayStart =  today.getTimeInMillis();
+		long todayEnd = todayStart + (24*60*60*1000) - 1;
+		
+		if(from > todayStart && from < todayEnd){
+			collectForToday(todayStart,todayEnd);
+		}
+		
+		if(to > todayStart && to < todayEnd){
+			collectForToday(todayStart,todayEnd);
+		}
+	}
+
+	private void collectForToday(long from,long to) {
+		logger.info("Going to collect for today...");
+		Credentials credentials = getCredentials();
+    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
+		try {
+			String sessionId = mBox.login();
+			collectCounterTransactions(from,to,sessionId,credentials.getPort());
+		} catch (ClientProtocolException e) {
+			logger.error("",e);
+
+		} catch (IOException e) {
+			logger.error("",e);
+		}
+	}
+	
+	private Credentials getCredentials(){
+		List<Credentials> list = credentialsRepository.findAll();
+		if(list.size() == 0){
+			logger.error("No Credentials are provided... we cannot do anything");
+			return null;
+		}
+		return list.get(0);
+	}
+	
+	
 }

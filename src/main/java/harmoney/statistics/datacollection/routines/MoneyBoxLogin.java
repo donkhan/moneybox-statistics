@@ -14,10 +14,12 @@ public class MoneyBoxLogin extends MoneyBoxPost{
 
 	private String userName;
 	private String passWord;
+	private int port;
 	
-	public MoneyBoxLogin(String userName,String passWord){
+	public MoneyBoxLogin(String userName,String passWord,int port){
 		this.userName = userName;
 		this.passWord = passWord;
+		this.port = port;
 	}
 	
 	@Override
@@ -58,5 +60,10 @@ public class MoneyBoxLogin extends MoneyBoxPost{
 	@Override
 	public void addExtraHeaders(HttpPost request) {
 
+	}
+
+	@Override
+	protected int getPort() {
+		return port;
 	}
 }

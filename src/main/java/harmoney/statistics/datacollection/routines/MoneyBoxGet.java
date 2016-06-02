@@ -11,13 +11,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public abstract class MoneyBoxGet {
 
 	private String server = "localhost";
-	private int port = 9192;
-
+	private int port = 0;
+	
 	protected String getServer() {
 		return server;
 	}
 
-	protected int getPort() {
+	protected int getPort(){
 		return port;
 	}
 
@@ -40,9 +40,10 @@ public abstract class MoneyBoxGet {
 	private String userName;
 	private String sessionId;
 	
-	public MoneyBoxGet(String userName,String sessionId){
+	public MoneyBoxGet(String userName,String sessionId,int port){
 		this.userName = userName;
 		this.sessionId = sessionId;
+		this.port = port;
 	}
 
 	

@@ -11,17 +11,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 public abstract class MoneyBoxPost {
 
-	//private String server = "101.99.73.46";
 	private String server = "localhost";
-	private int port = 9192;
 	
 	protected String getServer(){
 		return server;
 	}
 	
-	protected int getPort(){
-		return port;
-	}
+	protected abstract int getPort();
 	
 	public HttpResponse execute() throws ClientProtocolException, IOException{
 		HttpClient client = new DefaultHttpClient();

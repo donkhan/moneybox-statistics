@@ -8,7 +8,9 @@ import harmoney.statistics.datacollection.DataCollector;
 import harmoney.statistics.model.CounterTransaction;
 import harmoney.statistics.model.CountryStatistics;
 import harmoney.statistics.model.CountryStatisticsCollection;
+import harmoney.statistics.model.Credentials;
 import harmoney.statistics.model.SessionMap;
+import harmoney.statistics.repository.CredentialsRepository;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -46,6 +49,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,6 +64,8 @@ public class StatisticsController {
     @Autowired
     private MongoTemplate mongoTemplate;
     
+    @Resource
+	private CredentialsRepository credentialsRepository;
 
 	@RequestMapping("/")
     @CrossOrigin
@@ -68,10 +74,26 @@ public class StatisticsController {
         return Response.ok().entity(result).header("Access-Control-Allow-Origin", "*")
     			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
     }
+	
+	@RequestMapping(value = "/update-credentials", method = RequestMethod.POST, headers = "Accept=application/json", 
+    		produces = "application/json")
+	public Response updateCredentials(@RequestBody final Credentials credentials,HttpServletRequest request) {
+		if(!isAuthenticatedRequest(request)){
+    		return Response.serverError().build();
+    	}
+		logger.info("Credentials {}",credentials);
+		credentialsRepository.deleteAll();
+		credentialsRepository.save(credentials);
+		return Response.ok().header("Access-Control-Allow-Origin", "*")
+    			.header("Access-Control-Allow-Methods", "POST").build();
+	}
     
 	@RequestMapping(value = "/tran-statistics/take-backup", method = RequestMethod.GET, headers = "Accept=application/json", 
     		produces = "application/json")
 	public Response takeBackup(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
+		if(!isAuthenticatedRequest(request)){
+    		return Response.serverError().build();
+    	}
 		DataCollector dc = new DataCollector();
 		dc.takeBackup();
 		return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -81,11 +103,9 @@ public class StatisticsController {
     @RequestMapping(value = "/tran-statistics/counter/download-report", method = RequestMethod.GET, headers = "Accept=application/json", 
     		produces = "application/json")
 	public Response downloadReport(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
-    	
     	if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
     	}
-    	
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
 			InputStream inputStream = classLoader.getResourceAsStream("branchstatistics.jrxml");
@@ -136,9 +156,6 @@ public class StatisticsController {
     	String  token = request.getParameter("token");
     	SessionMap sessionMap = SessionMap.getSessionMap();
     	JSONObject user = sessionMap.get(token);
-    	//@ TODO
-    	user = new JSONObject();
-    	user.put("id", "sadmin"); user.put("branch","TRICHY");
     	return user;
     }
     
@@ -162,11 +179,16 @@ public class StatisticsController {
 		return null;
 	}
     
+    
+    
     private CountryStatisticsCollection getData(HttpServletRequest request){
     	long from = Long.parseLong(request.getParameter("start-time"));
     	long to = Long.parseLong(request.getParameter("end-time"));
     	logger.info("From {} " , new Date(from));
     	logger.info("To {}" , new Date(to));
+    	
+    	DataCollector dataCollector = new DataCollector();
+    	dataCollector.checkAndCollectForToday(from,to);
     	
     	Criteria criteria = Criteria.where("time").gte(from).lte(to);
     	if(request.getParameter("branchId") != null){

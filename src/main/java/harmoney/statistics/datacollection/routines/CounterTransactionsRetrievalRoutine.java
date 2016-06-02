@@ -10,8 +10,8 @@ import org.apache.http.HttpResponse;
 
 public class CounterTransactionsRetrievalRoutine extends MoneyBoxGet{
 	
-	public CounterTransactionsRetrievalRoutine(String userName,String sessionId){
-		super(userName,sessionId);
+	public CounterTransactionsRetrievalRoutine(String userName,String sessionId,int port){
+		super(userName,sessionId,port);
 	}
 	
 	private long st;
