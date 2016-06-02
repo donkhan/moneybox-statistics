@@ -7,8 +7,15 @@ public class CounterTransaction {
 	private double amount = 0;
 	private String type;
 	private int branchId;
+	private String customerName = "Guest";
 	
 	
+	public String getCustomerName() {
+		return customerName;
+	}
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 	public int getBranchId() {
 		return branchId;
 	}

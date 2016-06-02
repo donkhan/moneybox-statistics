@@ -6,7 +6,6 @@ import harmoney.statistics.datacollection.routines.MoneyBoxLogin;
 import harmoney.statistics.model.CounterTransaction;
 import harmoney.statistics.model.Customer;
 import harmoney.statistics.repository.CounterTransactionRepository;
-import harmoney.statistics.web.StatisticsController;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,26 +35,38 @@ public class DataCollector {
 	@Resource
 	CounterTransactionRepository cdsRepository;
 	
-    @Scheduled(fixedRate = 500000)
-    //@Scheduled(cron = "0 0 4 * * ?")
+	private boolean dev = true;
+        
+    private void simulateData(){
+    	List<CounterTransaction> list = new ArrayList<CounterTransaction>();
+    	for(int i = 0;i<10;i++){
+    		CounterTransaction ct  = new CounterTransaction();
+    		ct.setAmount(123);
+    		ct.setBranchId(1);
+    		ct.setCountry("MALAYSIA");
+    		ct.setId(i);
+    		ct.setTime(System.currentTimeMillis());
+    		ct.setType(i%2 == 0 ? "B" : "S");
+    		ct.setCustomerName("Rex");
+    		list.add(ct);
+    	}
+    	cdsRepository.save(list);
+    }
+
     
+    @Scheduled(cron = "0 0 4 * * ?")
+    //@Scheduled (fixedRate=50000)
     public void startCollector(){
     	MoneyBoxLogin mBox = new MoneyBoxLogin("sadmin","");
     	Calendar calendar = new GregorianCalendar();
     	try {
-			String sessionId = mBox.login();
+    		String sessionId = mBox.login();
 			calendar.set(Calendar.MILLISECOND, 0);
 			calendar.set(Calendar.SECOND,0);
 			calendar.set(Calendar.MINUTE,0);
 			calendar.set(Calendar.HOUR_OF_DAY,0);
-			calendar.set(Calendar.DATE,1);
-			calendar.set(Calendar.MONTH,0);
-			calendar.set(Calendar.YEAR,2016);
-	
-			for(int i = 0;i<155;i++){
-	    		//collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId);
-	    		calendar.add(Calendar.DATE, 1);
-	    	}
+			calendar.add(Calendar.DATE,-1);
+			collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -66,6 +77,7 @@ public class DataCollector {
     final Logger logger = LoggerFactory.getLogger(DataCollector.class);
     
     public void collectCounterTransactions(long st,long en,String sessionId){
+    	logger.info("Start {} End {} ", new Date(st), new Date(en));
     	try {
 			CounterTransactionsRetrievalRoutine routine = 
 					new CounterTransactionsRetrievalRoutine("sadmin",sessionId);
@@ -102,6 +114,7 @@ public class DataCollector {
 			cds.setTime((Long)record.get("date"));
 			cds.setId((Integer)record.get("id"));
 			cds.setBranchId((Integer)record.get("branchId"));
+			cds.setCustomerName(customer.getName());
 			list.add(cds);
     	}
     	cdsRepository.save(list);
