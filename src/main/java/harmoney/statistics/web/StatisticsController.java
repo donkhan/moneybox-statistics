@@ -9,7 +9,13 @@ import harmoney.statistics.model.CountryStatistics;
 import harmoney.statistics.model.CountryStatisticsCollection;
 import harmoney.statistics.model.SessionMap;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,11 +70,12 @@ public class StatisticsController {
     @RequestMapping(value = "/tran-statistics/counter/download-report", method = RequestMethod.GET, headers = "Accept=application/json", 
     		produces = "application/json")
 	public Response downloadReport(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
+    	if(!isAuthenticatedRequest(request)){
+    		return Response.serverError().build();
+    	}
 		try {
-
 			ClassLoader classLoader = getClass().getClassLoader();
 			InputStream inputStream = classLoader.getResourceAsStream("branchstatistics.jrxml");
-			logger.info("IS {}",inputStream);
 			byte output[] = prepareJasperReport(inputStream,getData(request),
 					new Date(Long.parseLong(request.getParameter("start-time"))).toString(),
 					new Date(Long.parseLong(request.getParameter("end-time"))).toString(),
@@ -76,6 +83,9 @@ public class StatisticsController {
 			response.getOutputStream().write(output);
 			response.getOutputStream().close();
 			CountryStatisticsCollection csc = getData(request);
+			JSONObject user = new JSONObject();
+	    	user.put("id", "sadmin"); user.put("branch","TRICHY");
+	    	audit(user,"Retrieved Counter Transaction Statistics","SUCCESS");
 			return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
 	    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
 		} catch (Throwable e) {
@@ -83,7 +93,32 @@ public class StatisticsController {
 		}
 		return Response.ok().build();
 	}
+    
+    @RequestMapping("/tran-statistics/counter")
+    @CrossOrigin
+    public Response counterStatistics(HttpServletRequest request) {
+    	if(!isAuthenticatedRequest(request)){
+    		return Response.serverError().build();
+    	}
+    	JSONObject user = new JSONObject();
+    	user.put("id", "sadmin"); user.put("branch","TRICHY");
+    	audit(user,"Retrieved Counter Transaction Statistics","SUCCESS");
+    	CountryStatisticsCollection csc = getData(request);
+    	return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
+    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
+    }
 
+
+    private boolean isAuthenticatedRequest(HttpServletRequest request){
+    	/*String  token = request.getParameter("token");
+    	SessionMap sessionMap = SessionMap.getSessionMap();
+    	if(!sessionMap.containsKey(token)){
+    		logger.error("Unable to serve as token {} is not present in Statistics Server ",token);
+    		return false;
+    	}
+    	JSONObject user = sessionMap.get(token);*/
+    	return true;
+    }
     private byte[] prepareJasperReport(InputStream inputStream,CountryStatisticsCollection dataSource,String fromDateS,String toDateS,String branchId){
 		try {
 			JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);
@@ -103,21 +138,6 @@ public class StatisticsController {
 		}
 		return null;
 	}
-    
-    @RequestMapping("/tran-statistics/counter")
-    @CrossOrigin
-    public Response counterStatistics(HttpServletRequest request) {
-    	String  token = request.getParameter("token");
-    	SessionMap sessionMap = SessionMap.getSessionMap();
-    	if(!sessionMap.containsKey(token)){
-    		logger.error("Unable to serve as token {} is not present in Statistics Server ",token);
-    		return Response.serverError().build();
-    	}
-    	JSONObject user = sessionMap.get(token);
-    	CountryStatisticsCollection csc = getData(request);
-    	return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
-    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
-    }
     
     private CountryStatisticsCollection getData(HttpServletRequest request){
     	long from = Long.parseLong(request.getParameter("start-time"));
@@ -200,4 +220,33 @@ public class StatisticsController {
 		}
 	}
 	
+	public void sendAuditLog(String syslogMessage){	
+		try {
+			DatagramSocket clientSocket = new DatagramSocket();
+			InetAddress IPAddress = InetAddress.getByName("localhost");
+			byte[] sendData = syslogMessage.getBytes();
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 5678);
+			clientSocket.send(sendPacket);
+			clientSocket.close();
+		} catch (SocketException e) {
+			logger.error("Socket Exception {}",e);
+		} catch(UnknownHostException ukhe){
+			logger.error("Unknown Host Exception {}",ukhe);
+		}catch(IOException ioe){
+			logger.error("IO Exception ",ioe);
+		}
+		logger.info("SysLog Sent");
+	}
+	
+	 private void audit(JSONObject user, String message,String status) {
+		 JSONObject x = new JSONObject();
+		 x.put("time",System.currentTimeMillis());
+		 x.put("branch", user.get("branch"));
+		 x.put("message", message);
+		 x.put("module","Statistics");
+		 x.put("user", user.get("id"));
+		 x.put("status",status);
+		 x.put("messageType", "LOG");
+		 sendAuditLog(x.toJSONString());
+	}
 }
