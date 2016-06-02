@@ -33,30 +33,40 @@ import org.springframework.stereotype.Component;
 public class DataCollector {
 
 	@Resource
-	CounterTransactionRepository cdsRepository;
-	
-	private boolean dev = true;
-        
-    private void simulateData(){
-    	List<CounterTransaction> list = new ArrayList<CounterTransaction>();
-    	for(int i = 0;i<10;i++){
-    		CounterTransaction ct  = new CounterTransaction();
-    		ct.setAmount(123);
-    		ct.setBranchId(1);
-    		ct.setCountry("MALAYSIA");
-    		ct.setId(i);
-    		ct.setTime(System.currentTimeMillis());
-    		ct.setType(i%2 == 0 ? "B" : "S");
-    		ct.setCustomerName("Rex");
-    		list.add(ct);
-    	}
-    	cdsRepository.save(list);
-    }
+	private CounterTransactionRepository cdsRepository;
 
+    public void takeBackup(){
+    	Calendar yesterday = new GregorianCalendar();
+    	yesterday.set(Calendar.MILLISECOND, 0);
+    	yesterday.set(Calendar.SECOND,0);
+    	yesterday.set(Calendar.MINUTE,0);
+    	yesterday.set(Calendar.HOUR_OF_DAY,0);
+    	yesterday.add(Calendar.DATE,-1);
+    
+    	Calendar fourYearsBack = (GregorianCalendar)yesterday.clone();
+    	fourYearsBack.add(Calendar.YEAR,-4);
+    	MoneyBoxLogin mBox = new MoneyBoxLogin("sadmin","");
+		try {
+			String sessionId = mBox.login();
+			runBackUp(fourYearsBack,yesterday,sessionId);
+		} catch (ClientProtocolException e) {
+			logger.error("",e);
+
+		} catch (IOException e) {
+			logger.error("",e);
+		}
+		
+    }
+    
+    private void runBackUp(Calendar fourYearsBack, Calendar yesterday,String sessionId){
+    	while(fourYearsBack.before(yesterday)){
+    		collectCounterTransactions(fourYearsBack.getTimeInMillis(),fourYearsBack.getTimeInMillis() + 24*60*60*1000-1,sessionId);
+    		fourYearsBack.add(Calendar.DATE, 1);
+    	}
+    }
     
     @Scheduled(cron = "0 0 4 * * ?")
-    //@Scheduled (fixedRate=50000)
-    public void startCollector(){
+    public void startDailyCollector(){
     	MoneyBoxLogin mBox = new MoneyBoxLogin("sadmin","");
     	Calendar calendar = new GregorianCalendar();
     	try {
@@ -78,6 +88,7 @@ public class DataCollector {
     
     public void collectCounterTransactions(long st,long en,String sessionId){
     	logger.info("Start {} End {} ", new Date(st), new Date(en));
+    	
     	try {
 			CounterTransactionsRetrievalRoutine routine = 
 					new CounterTransactionsRetrievalRoutine("sadmin",sessionId);
@@ -95,6 +106,7 @@ public class DataCollector {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
     }
 
     private void prepareStatistics(JSONArray content,Map<Integer,Customer> customerMap,long st){

@@ -4,6 +4,7 @@ package harmoney.statistics.web;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import harmoney.statistics.datacollection.DataCollector;
 import harmoney.statistics.model.CounterTransaction;
 import harmoney.statistics.model.CountryStatistics;
 import harmoney.statistics.model.CountryStatisticsCollection;
@@ -68,6 +69,14 @@ public class StatisticsController {
     			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
     }
     
+	@RequestMapping(value = "/tran-statistics/take-backup", method = RequestMethod.GET, headers = "Accept=application/json", 
+    		produces = "application/json")
+	public Response takeBackup(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
+		DataCollector dc = new DataCollector();
+		dc.takeBackup();
+		return Response.ok().build();
+	}
+	
     @RequestMapping(value = "/tran-statistics/counter/download-report", method = RequestMethod.GET, headers = "Accept=application/json", 
     		produces = "application/json")
 	public Response downloadReport(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
