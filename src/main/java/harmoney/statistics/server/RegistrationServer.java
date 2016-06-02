@@ -13,16 +13,18 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 public class RegistrationServer {
 	private final static int PACKETSIZE = 10000;
 	
 	final Logger logger = LoggerFactory.getLogger(RegistrationServer.class);
 	private JSONParser parser = new JSONParser();
+	private static int PORT = 3333;
 	
-	public void start(int port) {
+	public void start() {
 		try {
-			DatagramSocket socket = new DatagramSocket(port);
-			logger.info("Registration Server is ready and listening in port " + port);
+			DatagramSocket socket = new DatagramSocket(PORT);
+			logger.info("Registration Server is ready and listening in port " + PORT);
 			for (;;) {
 				DatagramPacket packet = new DatagramPacket(	new byte[PACKETSIZE], PACKETSIZE);
 				socket.receive(packet);

@@ -6,6 +6,7 @@ public class Credentials {
 	private String password;
 	private int port;
 	
+	
 	public int getPort() {
 		return port;
 	}

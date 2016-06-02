@@ -21,7 +21,7 @@ public class App implements CommandLineRunner{
     @Override
 	public void run(String... args) throws Exception {
     	RegistrationServer registrationServer = new RegistrationServer();
-    	registrationServer.start(3333);
+    	registrationServer.start();
     }
     
     

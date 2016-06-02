@@ -11,6 +11,7 @@ import harmoney.statistics.model.CountryStatisticsCollection;
 import harmoney.statistics.model.Credentials;
 import harmoney.statistics.model.SessionMap;
 import harmoney.statistics.repository.CredentialsRepository;
+import harmoney.statistics.server.RegistrationServer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,9 +82,10 @@ public class StatisticsController {
 		if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
     	}
-		logger.info("Credentials {}",credentials);
+		List<Credentials> list = credentialsRepository.findAll();
 		credentialsRepository.deleteAll();
 		credentialsRepository.save(credentials);
+		
 		return Response.ok().header("Access-Control-Allow-Origin", "*")
     			.header("Access-Control-Allow-Methods", "POST").build();
 	}
