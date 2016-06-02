@@ -16,6 +16,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,21 +71,24 @@ public class StatisticsController {
     @RequestMapping(value = "/tran-statistics/counter/download-report", method = RequestMethod.GET, headers = "Accept=application/json", 
     		produces = "application/json")
 	public Response downloadReport(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
+    	
     	if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
     	}
+    	
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
 			InputStream inputStream = classLoader.getResourceAsStream("branchstatistics.jrxml");
+			DateFormat format = DateFormat.getDateInstance();
 			byte output[] = prepareJasperReport(inputStream,getData(request),
-					new Date(Long.parseLong(request.getParameter("start-time"))).toString(),
-					new Date(Long.parseLong(request.getParameter("end-time"))).toString(),
+					format.format(new Date(Long.parseLong(request.getParameter("start-time")))),
+					format.format(new Date(Long.parseLong(request.getParameter("end-time")))),
 					request.getParameter("branchId"));
 			response.getOutputStream().write(output);
 			response.getOutputStream().close();
 			CountryStatisticsCollection csc = getData(request);
 			JSONObject user = getUser(request);
-	    	audit(user,"Retrieved Counter Transaction Statistics","SUCCESS");
+	    	audit(user,"Downloaded Counter Transaction Statistics Report","SUCCESS");
 			return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
 	    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
 		} catch (Throwable e) {
@@ -122,6 +126,7 @@ public class StatisticsController {
     	String  token = request.getParameter("token");
     	SessionMap sessionMap = SessionMap.getSessionMap();
     	JSONObject user = sessionMap.get(token);
+    	//@ TODO
     	user = new JSONObject();
     	user.put("id", "sadmin"); user.put("branch","TRICHY");
     	return user;
