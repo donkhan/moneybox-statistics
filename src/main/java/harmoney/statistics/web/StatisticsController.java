@@ -74,7 +74,8 @@ public class StatisticsController {
 	public Response takeBackup(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
 		DataCollector dc = new DataCollector();
 		dc.takeBackup();
-		return Response.ok().build();
+		return Response.ok().header("Access-Control-Allow-Origin", "*")
+    			.header("Access-Control-Allow-Methods", "GET").build();
 	}
 	
     @RequestMapping(value = "/tran-statistics/counter/download-report", method = RequestMethod.GET, headers = "Accept=application/json", 
