@@ -83,8 +83,7 @@ public class StatisticsController {
 			response.getOutputStream().write(output);
 			response.getOutputStream().close();
 			CountryStatisticsCollection csc = getData(request);
-			JSONObject user = new JSONObject();
-	    	user.put("id", "sadmin"); user.put("branch","TRICHY");
+			JSONObject user = getUser(request);
 	    	audit(user,"Retrieved Counter Transaction Statistics","SUCCESS");
 			return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
 	    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
@@ -100,8 +99,8 @@ public class StatisticsController {
     	if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
     	}
-    	JSONObject user = new JSONObject();
-    	user.put("id", "sadmin"); user.put("branch","TRICHY");
+    	
+    	JSONObject user = getUser(request);
     	audit(user,"Retrieved Counter Transaction Statistics","SUCCESS");
     	CountryStatisticsCollection csc = getData(request);
     	return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
@@ -110,15 +109,24 @@ public class StatisticsController {
 
 
     private boolean isAuthenticatedRequest(HttpServletRequest request){
-    	/*String  token = request.getParameter("token");
+    	String  token = request.getParameter("token");
     	SessionMap sessionMap = SessionMap.getSessionMap();
     	if(!sessionMap.containsKey(token)){
     		logger.error("Unable to serve as token {} is not present in Statistics Server ",token);
     		return false;
     	}
-    	JSONObject user = sessionMap.get(token);*/
     	return true;
     }
+    
+    private JSONObject getUser(HttpServletRequest request){
+    	String  token = request.getParameter("token");
+    	SessionMap sessionMap = SessionMap.getSessionMap();
+    	JSONObject user = sessionMap.get(token);
+    	user = new JSONObject();
+    	user.put("id", "sadmin"); user.put("branch","TRICHY");
+    	return user;
+    }
+    
     private byte[] prepareJasperReport(InputStream inputStream,CountryStatisticsCollection dataSource,String fromDateS,String toDateS,String branchId){
 		try {
 			JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);
