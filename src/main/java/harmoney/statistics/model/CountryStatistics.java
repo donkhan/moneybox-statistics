@@ -2,15 +2,39 @@ package harmoney.statistics.model;
 
 public class CountryStatistics {
 
-	private double totalBuyAmount;
-	private double totalSellAmount;
-	private String country;
-	private int totalBuys;
-	private int totalSells;
+	private double totalBuyValue = 0;
+	public double getTotalBuyValue() {
+		return totalBuyValue;
+	}
+	public void setTotalBuyValue(double totalBuyValue) {
+		this.totalBuyValue = totalBuyValue;
+	}
+	public double getTotalSellValue() {
+		return totalSellValue;
+	}
+	public void setTotalSellValue(double totalSellValue) {
+		this.totalSellValue = totalSellValue;
+	}
+	public double getTotalBuy() {
+		return totalBuy;
+	}
+	public void setTotalBuy(double totalBuy) {
+		this.totalBuy = totalBuy;
+	}
+	public double getTotalSell() {
+		return totalSell;
+	}
+	public void setTotalSell(double totalSell) {
+		this.totalSell = totalSell;
+	}
+	private double totalSellValue = 0;
+	private String country = "";
+	private double totalBuy = 0;
+	private double totalSell = 0;
 	
-	private double buyPercentage;
-	private double sellPercentage;
-	private double buyValuePercentage;
+	private double buyPercentage = 0;
+	private double sellPercentage = 0;
+	private double buyValuePercentage = 0;
 
 	public double getBuyPercentage() {
 		return buyPercentage;
@@ -37,38 +61,15 @@ public class CountryStatistics {
 		this.sellValuePercentage = sellValuePercentage;
 	}
 	private double sellValuePercentage;
-
-	
-	public double getTotalBuyAmount() {
-		return totalBuyAmount;
-	}
-	public void setTotalBuyAmount(double totalBuyAmount) {
-		this.totalBuyAmount = totalBuyAmount;
-	}
-	public double getTotalSellAmount() {
-		return totalSellAmount;
-	}
-	public void setTotalSellAmount(double totalSellAmount) {
-		this.totalSellAmount = totalSellAmount;
-	}
 	public String getCountry() {
 		return country;
 	}
 	public void setCountry(String country) {
 		this.country = country;
 	}
-	public int getTotalBuys() {
-		return totalBuys;
-	}
-	public void setTotalBuys(int totalBuys) {
-		this.totalBuys = totalBuys;
-	}
-	public int getTotalSells() {
-		return totalSells;
-	}
-	public void setTotalSells(int totalSells) {
-		this.totalSells = totalSells;
-	}
+
+	
+	
 	
 	
 }

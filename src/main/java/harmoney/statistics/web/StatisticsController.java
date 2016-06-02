@@ -8,8 +8,8 @@ import harmoney.statistics.model.CounterTransaction;
 import harmoney.statistics.model.CountryStatistics;
 import harmoney.statistics.model.CountryStatisticsCollection;
 import harmoney.statistics.model.SessionMap;
-import harmoney.statistics.repository.CounterTransactionRepository;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +17,15 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.Response;
+
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 
 import org.bson.BSONObject;
 import org.bson.types.BasicBSONList;
@@ -31,6 +39,7 @@ import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mongodb.DBObject;
@@ -39,25 +48,65 @@ import com.mongodb.DBObject;
 public class StatisticsController {
 
 	final Logger logger = LoggerFactory.getLogger(StatisticsController.class);
-    @RequestMapping("/")
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+    
+
+	@RequestMapping("/")
     @CrossOrigin
     public Response index() {
     	String result = "This Micro Service will provide statistics data of Money Box";
         return Response.ok().entity(result).header("Access-Control-Allow-Origin", "*")
     			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
     }
-  
-    @Autowired
-	private CounterTransactionRepository countryDayStatisticsLogRepository;
     
-    @Autowired
-    private MongoTemplate mongoTemplate;
-    
+    @RequestMapping(value = "/tran-statistics/counter/download-report", method = RequestMethod.GET, headers = "Accept=application/json", 
+    		produces = "application/json")
+	public Response downloadReport(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
+		try {
+
+			ClassLoader classLoader = getClass().getClassLoader();
+			InputStream inputStream = classLoader.getResourceAsStream("branchstatistics.jrxml");
+			logger.info("IS {}",inputStream);
+			byte output[] = prepareJasperReport(inputStream,getData(request),
+					new Date(Long.parseLong(request.getParameter("start-time"))).toString(),
+					new Date(Long.parseLong(request.getParameter("end-time"))).toString(),
+					request.getParameter("branchId"));
+			response.getOutputStream().write(output);
+			response.getOutputStream().close();
+			CountryStatisticsCollection csc = getData(request);
+			return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
+	    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return Response.ok().build();
+	}
+
+    private byte[] prepareJasperReport(InputStream inputStream,CountryStatisticsCollection dataSource,String fromDateS,String toDateS,String branchId){
+		try {
+			JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);
+			Map<String,Object> params = new HashMap<String,Object>();
+			params.put("period", fromDateS + " to " + toDateS);
+			if(branchId.equals("-1")){
+				params.put("branch", "ALL");
+			}else{
+				//params.put("branch", branchService.findById(Long.parseLong(branchId)).getName());
+				params.put("branch", "Yet to be determined");
+			}
+			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params,dataSource);
+			byte output[] = JasperExportManager.exportReportToPdf(jasperPrint);
+			return output;
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
     
     @RequestMapping("/tran-statistics/counter")
     @CrossOrigin
-    public Response test(HttpServletRequest request) {
-    	
+    public Response counterStatistics(HttpServletRequest request) {
     	String  token = request.getParameter("token");
     	SessionMap sessionMap = SessionMap.getSessionMap();
     	if(!sessionMap.containsKey(token)){
@@ -65,7 +114,12 @@ public class StatisticsController {
     		return Response.serverError().build();
     	}
     	JSONObject user = sessionMap.get(token);
-    	
+    	CountryStatisticsCollection csc = getData(request);
+    	return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
+    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
+    }
+    
+    private CountryStatisticsCollection getData(HttpServletRequest request){
     	long from = Long.parseLong(request.getParameter("start-time"));
     	long to = Long.parseLong(request.getParameter("end-time"));
     	logger.info("From {} " , new Date(from));
@@ -94,9 +148,8 @@ public class StatisticsController {
    
     	CountryStatisticsCollection csc = new CountryStatisticsCollection();
     	convert(csc,bo);
-    	logger.info("No of Items {}",csc.getItems().size());
-        return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
-    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
+    	logger.info("No of Records {}",csc.getItems().size());
+    	return csc;
     }
 
 
@@ -120,33 +173,31 @@ public class StatisticsController {
 				}
 				String type = (String)id.get("type");
 				if(type.equals("B")){
-					cs.setTotalBuyAmount((Double)b.get("totalAmount"));
-					cs.setTotalBuys((Integer)b.get("noOfTransactions"));
+					cs.setTotalBuyValue((Double)b.get("totalAmount"));
+					cs.setTotalBuy(1.0 * (Integer)b.get("noOfTransactions"));
 				}else{
-					cs.setTotalSellAmount((Double)b.get("totalAmount"));
-					cs.setTotalSells((Integer)b.get("noOfTransactions"));
+					cs.setTotalSellValue((Double)b.get("totalAmount"));
+					cs.setTotalSell(1.0 * (Integer)b.get("noOfTransactions"));
 				}
 			}
 		}
 		
 		Iterator<CountryStatistics> iterator = map.values().iterator();
-		int tb = 0, ts = 0;
+		double tb = 0, ts = 0;
 		double tbv = 0L,tsv = 0L;
 		while(iterator.hasNext()){
 			CountryStatistics cs = iterator.next(); 
 			csc.addItem(cs);
-			tb += cs.getTotalBuys(); ts = cs.getTotalSells();
-			tbv += cs.getTotalBuyAmount(); tsv += cs.getTotalSellAmount();
+			tb += cs.getTotalBuy(); ts = cs.getTotalSell();
+			tbv += cs.getTotalBuyValue(); tsv += cs.getTotalSellValue();
 		}
 		List<CountryStatistics> items = csc.getItems();
 		for(CountryStatistics cs : items ){
-			if(tb != 0)	cs.setBuyPercentage((double)cs.getTotalBuys()*100/tb);
-			if(ts != 0) cs.setSellPercentage((double)cs.getTotalSells()*100/ts);
-			if(tbv != 0) cs.setBuyValuePercentage((double)cs.getTotalBuyAmount()*100/tbv);
-			if(tsv != 0) cs.setSellValuePercentage((double)cs.getTotalSellAmount()*100/tsv);
+			if(tb != 0)	cs.setBuyPercentage((double)cs.getTotalBuy()*100/tb);
+			if(ts != 0) cs.setSellPercentage((double)cs.getTotalSell()*100/ts);
+			if(tbv != 0) cs.setBuyValuePercentage((double)cs.getTotalBuyValue()*100/tbv);
+			if(tsv != 0) cs.setSellValuePercentage((double)cs.getTotalSellValue()*100/tsv);
 		}
-		
 	}
-    
-    
+	
 }
