@@ -41,19 +41,5 @@ public class CounterTransactionsRetrievalRoutine extends MoneyBoxGet{
 		return "/harmoney2/tranReceiptCounters/filter?currency=All&type=All&status=C&userId=All&pageSize="
 				+pageSize+"&sortColumn=receiptId&sortDirection=desc&startTime="+st+"&endTime="+en;
 	}
-		
-	public StringBuffer getContent(HttpResponse response) throws IOException{
-		InputStream is = response.getEntity().getContent();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		StringBuffer buffer = new StringBuffer();
-		String s = "";
-		while((s = reader.readLine()) != null){
-			buffer.append(s);
-		}
-		reader.close();
-		is.close();
-		return buffer;
-	}
 	
-
 }

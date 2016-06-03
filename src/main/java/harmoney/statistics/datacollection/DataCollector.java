@@ -2,6 +2,7 @@ package harmoney.statistics.datacollection;
 
 import harmoney.statistics.datacollection.routines.CounterTransactionsRetrievalRoutine;
 import harmoney.statistics.datacollection.routines.CustomerCollectionRoutine;
+import harmoney.statistics.datacollection.routines.GetBranch;
 import harmoney.statistics.datacollection.routines.MoneyBoxLogin;
 import harmoney.statistics.datacollection.routines.MoneyBoxLogout;
 import harmoney.statistics.model.CounterTransaction;
@@ -268,5 +269,22 @@ public class DataCollector {
 			logger.error("Error {}",e);
 		}
 		logger.info("Session with {} for user {} is logged out",sessionId,credentials.getUserName());
+	}
+
+	public String getBranch(CredentialsRepository credentialsRepository2, CounterTransactionRepository cdsRepository2, int branchId) {
+		this.credentialsRepository = credentialsRepository2;
+		this.cdsRepository = cdsRepository2;
+		Credentials credentials = getCredentials();
+		if(credentials == null){
+			logger.error("Credentials is missing");
+			return "";
+		}
+		String sessionId = getSessionId(getCredentials());
+		if(sessionId.equals("")){
+			logger.error("Credentials are wrong");
+			return "";
+		}
+		GetBranch gb = new GetBranch(credentials.getUserName(),sessionId,credentials.getPort(),branchId);
+		return gb.getBranchName();
 	}
 }

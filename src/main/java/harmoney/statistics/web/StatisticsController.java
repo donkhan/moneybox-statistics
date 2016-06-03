@@ -178,8 +178,8 @@ public class StatisticsController {
 			if(branchId.equals("-1")){
 				params.put("branch", "ALL");
 			}else{
-				//params.put("branch", branchService.findById(Long.parseLong(branchId)).getName());
-				params.put("branch", "Yet to be determined");
+				DataCollector dc = new DataCollector();
+				params.put("branch", dc.getBranch(credentialsRepository,cdsRepository,Integer.parseInt(branchId)));
 			}
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params,dataSource);
 			byte output[] = JasperExportManager.exportReportToPdf(jasperPrint);
