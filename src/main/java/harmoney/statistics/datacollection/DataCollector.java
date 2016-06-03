@@ -64,6 +64,7 @@ public class DataCollector {
     	
     	String sessionId = getSessionId(credentials);
     	runBackUp(fourYearsBack,yesterday,sessionId,credentials.getPort());
+    	logout(credentials,sessionId);
     }
     
     private void runBackUp(Calendar fourYearsBack, Calendar yesterday,String sessionId,int port){
@@ -89,6 +90,7 @@ public class DataCollector {
     	calendar.set(Calendar.HOUR_OF_DAY,0);
     	calendar.add(Calendar.DATE,-1);
     	collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId,credentials.getPort());
+    	logout(credentials,sessionId);
     }
 
     final Logger logger = LoggerFactory.getLogger(DataCollector.class);
@@ -111,6 +113,7 @@ public class DataCollector {
 			routine.setSt(st);
 			HttpResponse response = routine.execute();
 			StringBuffer buffer = routine.getContent(response);
+			logger.error("Content {}",buffer.toString());
 			JSONObject object = new JSONObject(buffer.toString());
 			JSONObject data = (JSONObject)object.get("data");
 			JSONArray content = (JSONArray)data.get("content");
@@ -122,7 +125,7 @@ public class DataCollector {
 		} catch (IOException e) {
 			logger.error("Error {}",e);
 		}
-    	logout(credentials,sessionId);
+    	
     }
 
     private void prepareStatistics(JSONArray content,Map<Integer,Customer> customerMap,long st){
@@ -230,6 +233,7 @@ public class DataCollector {
     	}
 		String sessionId = getSessionId(credentials);
 		collectCounterTransactions(from,to,sessionId,credentials.getPort());
+		logout(credentials,sessionId);
 	}
 	
 	private Credentials getCredentials(){
