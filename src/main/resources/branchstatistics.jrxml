@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
+<!-- 2016-06-02T14:02:39 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="counterTransactionList" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="563" leftMargin="16" rightMargin="16" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="cd1e0d7b-2988-4850-a3cf-579f472a4cc3">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="96"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==0)]]></conditionExpression>
+			<style backcolor="#EFF7FF"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="period" class="java.lang.String"/>
+	<parameter name="branch" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="countryName" class="java.lang.String"/>
+	<field name="index" class="java.lang.Integer"/>
+	<field name="totalBuy" class="java.lang.Double"/>
+	<field name="totalBuyPercentage" class="java.lang.Double"/>
+	<field name="totalBuyValue" class="java.lang.Double"/>
+	<field name="totalBuyValuePercentage" class="java.lang.Double"/>
+	<field name="totalSell" class="java.lang.Double"/>
+	<field name="totalSellPercentage" class="java.lang.Double"/>
+	<field name="totalSellValue" class="java.lang.Double"/>
+	<field name="totalSellValuePercentage" class="java.lang.Double"/>
+	<variable name="totalBuyTransactions" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalBuy}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="totalSellTransactions" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalSell}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="totalBuyValue" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalBuyValue}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="totalSellValue" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalSellValue}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="110" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="366" height="30" uuid="6aec25e4-7b03-49f5-a4a2-e691b1ba9e35"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="12" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[COUNTRY WISE COUNTER TRANSACTION STATISTICS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="30" width="75" height="30" uuid="6aec25e4-7b03-49f5-a4a2-e691b1ba9e35"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[PERIOD :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="75" y="30" width="200" height="30" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{period}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="60" width="75" height="30" uuid="6aec25e4-7b03-49f5-a4a2-e691b1ba9e35"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[BRANCH :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="75" y="60" width="200" height="30" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{branch}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="105" width="560" height="1" uuid="9cfeb312-d07e-4828-9bad-f168cee7ebfd"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="40">
+			<staticText>
+				<reportElement x="0" y="0" width="25" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="19a7e3ce-a843-40d0-8924-26738a8393ed"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="25" y="0" width="50" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="3a6c3309-019f-4d1f-9c71-8d37445d51e0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="75" y="0" width="155" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="d2e0caa6-d96c-463f-9aa5-39e16187a93a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Buy]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="230" y="0" width="155" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="d2e0caa6-d96c-463f-9aa5-39e16187a93a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Sell]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="25" y="20" width="25" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="d2e0caa6-d96c-463f-9aa5-39e16187a93a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="0" y="20" width="25" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="d2e0caa6-d96c-463f-9aa5-39e16187a93a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="25" y="20" width="50" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[COUNTRY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="75" y="20" width="45" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="120" y="20" width="30" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="150" y="20" width="50" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[VALUE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="200" y="20" width="30" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="230" y="20" width="45" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="275" y="20" width="30" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="305" y="20" width="50" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[VALUE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TD" mode="Opaque" x="355" y="20" width="30" height="20" forecolor="#FFFFFF" backcolor="#0000FF" uuid="0fd73038-bdca-4cb4-8793-d576e71e912b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[%]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="20">
+			<textField>
+				<reportElement style="table_TD" x="0" y="0" width="25" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{index}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="25" y="0" width="50" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{countryName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="75" y="0" width="45" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getIntegerInstance().format($F{totalBuy})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="120" y="0" width="30" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($F{totalBuyPercentage})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="150" y="0" width="50" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($F{totalBuyValue})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="200" y="0" width="30" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($F{totalBuyValuePercentage})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="230" y="0" width="45" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getIntegerInstance().format($F{totalSell})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="275" y="0" width="30" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($F{totalSellPercentage})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="305" y="0" width="50" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($F{totalSellValue})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="table_TD" x="355" y="0" width="30" height="20" uuid="dad3ffb6-dbb0-4126-9965-d5aca680370d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($F{totalSellValuePercentage})]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="60">
+			<staticText>
+				<reportElement x="0" y="10" width="50" height="30" uuid="94bd8e95-dfb0-436d-9802-b225fd19c74a"/>
+				<text><![CDATA[Total Buy:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="10" width="100" height="30" uuid="d85943f8-1a0d-4791-92f5-c4c3fd541fff"/>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getIntegerInstance().format($V{totalBuyTransactions})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="150" y="10" width="50" height="30" uuid="94bd8e95-dfb0-436d-9802-b225fd19c74a"/>
+				<text><![CDATA[Value:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="200" y="10" width="100" height="30" uuid="d85943f8-1a0d-4791-92f5-c4c3fd541fff"/>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($V{totalBuyValue})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="30" width="50" height="30" uuid="94bd8e95-dfb0-436d-9802-b225fd19c74a"/>
+				<text><![CDATA[Total Sell:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="30" width="100" height="30" uuid="d85943f8-1a0d-4791-92f5-c4c3fd541fff"/>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getIntegerInstance().format($V{totalSellTransactions})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="150" y="30" width="50" height="30" uuid="94bd8e95-dfb0-436d-9802-b225fd19c74a"/>
+				<text><![CDATA[Value:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="200" y="30" width="100" height="30" uuid="d85943f8-1a0d-4791-92f5-c4c3fd541fff"/>
+				<textFieldExpression><![CDATA[java.text.NumberFormat.getNumberInstance().format($V{totalSellValue})]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
