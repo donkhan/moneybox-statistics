@@ -89,7 +89,7 @@ public class StatisticsController {
 		if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
     	}
-		List<Credentials> list = credentialsRepository.findAll();
+
 		credentialsRepository.deleteAll();
 		credentialsRepository.save(credentials);
 		
