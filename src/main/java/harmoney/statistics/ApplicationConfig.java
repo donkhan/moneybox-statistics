@@ -22,6 +22,6 @@ class ApplicationConfig extends AbstractMongoConfiguration {
 
   @Override
   protected String getMappingBasePackage() {
-    return "harmoney.auditlog.mongodb";
+    return "harmoney.statistics.model";
   }
 }

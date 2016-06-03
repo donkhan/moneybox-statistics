@@ -40,7 +40,10 @@ public class DataCollector {
 	@Resource
 	private CredentialsRepository credentialsRepository;
 	 
-    public void takeBackup(){
+    public void takeBackup(CredentialsRepository credentialsRepository, 
+    		CounterTransactionRepository cdsRepository){
+    	this.credentialsRepository = credentialsRepository;
+    	this.cdsRepository = cdsRepository;
     	Calendar yesterday = new GregorianCalendar();
     	yesterday.set(Calendar.MILLISECOND, 0);
     	yesterday.set(Calendar.SECOND,0);
@@ -52,7 +55,12 @@ public class DataCollector {
     	fourYearsBack.add(Calendar.YEAR,-4);
     	
     	Credentials credentials = getCredentials();
-    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
+    	if(credentials == null){
+    		logger.error("No Credentials to speak to MoneyBox");
+    		return;
+    	}
+    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),
+    			credentials.getPort());
 		try {
 			String sessionId = mBox.login();
 			runBackUp(fourYearsBack,yesterday,sessionId,credentials.getPort());
@@ -75,6 +83,10 @@ public class DataCollector {
     @Scheduled(cron = "0 0 4 * * ?")
     public void startDailyCollector(){
     	Credentials credentials = getCredentials();
+    	if(credentials == null){
+    		logger.error("No Credentials to speak to MoneyBox");
+    		return;
+    	}
     	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
     	Calendar calendar = new GregorianCalendar();
     	try {
@@ -96,10 +108,14 @@ public class DataCollector {
     
     public void collectCounterTransactions(long st,long en,String sessionId,int port){
     	logger.info("Start {} End {} ", new Date(st), new Date(en));
-    	
+    	Credentials credentials = getCredentials();
+    	if(credentials == null){
+    		logger.error("No Credentials to speak to MoneyBox");
+    		return;
+    	}
     	try {
 			CounterTransactionsRetrievalRoutine routine = 
-					new CounterTransactionsRetrievalRoutine("sadmin",sessionId,port);
+					new CounterTransactionsRetrievalRoutine(credentials);
 			routine.setEn(en);
 			routine.setSt(st);
 			HttpResponse response = routine.execute();
@@ -118,7 +134,9 @@ public class DataCollector {
     }
 
     private void prepareStatistics(JSONArray content,Map<Integer,Customer> customerMap,long st){
+    	logger.info("CDS Repo {} Credentials Repo {}",cdsRepository, credentialsRepository);
     	int length = content.length();
+    	logger.info("No of Records {}",length);
     	List<CounterTransaction> list = new ArrayList<CounterTransaction>();
     	for(int i = 0;i<length;i++){
 			JSONObject record = (JSONObject)content.get(i);
@@ -189,7 +207,10 @@ public class DataCollector {
 		
 	}
 
-	public void checkAndCollectForToday(long from, long to) {
+	public void checkAndCollectForToday(long from, long to,
+			CredentialsRepository credentialsRepository2, CounterTransactionRepository cdsRepository2) {
+		this.credentialsRepository = credentialsRepository2;
+		this.cdsRepository = cdsRepository2;
 		GregorianCalendar today = new GregorianCalendar();
 		today.set(Calendar.MILLISECOND, 0);
 		today.set(Calendar.SECOND,0);
@@ -211,6 +232,10 @@ public class DataCollector {
 	private void collectForToday(long from,long to) {
 		logger.info("Going to collect for today...");
 		Credentials credentials = getCredentials();
+		if(credentials == null){
+    		logger.error("No Credentials to speak to MoneyBox");
+    		return;
+    	}
     	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
 		try {
 			String sessionId = mBox.login();
@@ -224,6 +249,7 @@ public class DataCollector {
 	}
 	
 	private Credentials getCredentials(){
+		logger.info("Credentials Repo {} CDS repo {} ",credentialsRepository,cdsRepository);
 		List<Credentials> list = credentialsRepository.findAll();
 		if(list.size() == 0){
 			logger.error("No Credentials are provided... we cannot do anything");

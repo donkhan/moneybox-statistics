@@ -10,8 +10,8 @@ import harmoney.statistics.model.CountryStatistics;
 import harmoney.statistics.model.CountryStatisticsCollection;
 import harmoney.statistics.model.Credentials;
 import harmoney.statistics.model.SessionMap;
+import harmoney.statistics.repository.CounterTransactionRepository;
 import harmoney.statistics.repository.CredentialsRepository;
-import harmoney.statistics.server.RegistrationServer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,9 +68,13 @@ public class StatisticsController {
     @Resource
 	private CredentialsRepository credentialsRepository;
 
+    @Resource
+	private CounterTransactionRepository cdsRepository;
+    
 	@RequestMapping("/")
     @CrossOrigin
     public Response index() {
+		logger.info("Credentials Repo {}",credentialsRepository);
     	String result = "This Micro Service will provide statistics data of Money Box";
         return Response.ok().entity(result).header("Access-Control-Allow-Origin", "*")
     			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
@@ -97,7 +101,7 @@ public class StatisticsController {
     		return Response.serverError().build();
     	}
 		DataCollector dc = new DataCollector();
-		dc.takeBackup();
+		dc.takeBackup(credentialsRepository,cdsRepository);
 		return Response.ok().header("Access-Control-Allow-Origin", "*")
     			.header("Access-Control-Allow-Methods", "GET").build();
 	}
@@ -190,7 +194,7 @@ public class StatisticsController {
     	logger.info("To {}" , new Date(to));
     	
     	DataCollector dataCollector = new DataCollector();
-    	dataCollector.checkAndCollectForToday(from,to);
+    	dataCollector.checkAndCollectForToday(from,to,credentialsRepository,cdsRepository);
     	
     	Criteria criteria = Criteria.where("time").gte(from).lte(to);
     	if(request.getParameter("branchId") != null){
