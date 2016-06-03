@@ -3,6 +3,7 @@ package harmoney.statistics.datacollection;
 import harmoney.statistics.datacollection.routines.CounterTransactionsRetrievalRoutine;
 import harmoney.statistics.datacollection.routines.CustomerCollectionRoutine;
 import harmoney.statistics.datacollection.routines.MoneyBoxLogin;
+import harmoney.statistics.datacollection.routines.MoneyBoxLogout;
 import harmoney.statistics.model.CounterTransaction;
 import harmoney.statistics.model.Credentials;
 import harmoney.statistics.model.Customer;
@@ -59,18 +60,9 @@ public class DataCollector {
     		logger.error("No Credentials to speak to MoneyBox");
     		return;
     	}
-    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),
-    			credentials.getPort());
-		try {
-			String sessionId = mBox.login();
-			runBackUp(fourYearsBack,yesterday,sessionId,credentials.getPort());
-		} catch (ClientProtocolException e) {
-			logger.error("",e);
-
-		} catch (IOException e) {
-			logger.error("",e);
-		}
-		
+    	
+    	String sessionId = getSessionId(credentials);
+    	runBackUp(fourYearsBack,yesterday,sessionId,credentials.getPort());
     }
     
     private void runBackUp(Calendar fourYearsBack, Calendar yesterday,String sessionId,int port){
@@ -87,26 +79,24 @@ public class DataCollector {
     		logger.error("No Credentials to speak to MoneyBox");
     		return;
     	}
-    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
+
     	Calendar calendar = new GregorianCalendar();
-    	try {
-    		String sessionId = mBox.login();
-			calendar.set(Calendar.MILLISECOND, 0);
-			calendar.set(Calendar.SECOND,0);
-			calendar.set(Calendar.MINUTE,0);
-			calendar.set(Calendar.HOUR_OF_DAY,0);
-			calendar.add(Calendar.DATE,-1);
-			collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId,credentials.getPort());
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    	String sessionId = getSessionId(credentials);
+    	calendar.set(Calendar.MILLISECOND, 0);
+    	calendar.set(Calendar.SECOND,0);
+    	calendar.set(Calendar.MINUTE,0);
+    	calendar.set(Calendar.HOUR_OF_DAY,0);
+    	calendar.add(Calendar.DATE,-1);
+    	collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId,credentials.getPort());
     }
 
     final Logger logger = LoggerFactory.getLogger(DataCollector.class);
     
     public void collectCounterTransactions(long st,long en,String sessionId,int port){
+    	if(sessionId.equals("")){
+    		logger.error("Session Id is null. Check credentials ...");
+    		return;
+    	}
     	logger.info("Start {} End {} ", new Date(st), new Date(en));
     	Credentials credentials = getCredentials();
     	if(credentials == null){
@@ -115,7 +105,7 @@ public class DataCollector {
     	}
     	try {
 			CounterTransactionsRetrievalRoutine routine = 
-					new CounterTransactionsRetrievalRoutine(credentials);
+					new CounterTransactionsRetrievalRoutine(credentials,sessionId);
 			routine.setEn(en);
 			routine.setSt(st);
 			HttpResponse response = routine.execute();
@@ -125,12 +115,13 @@ public class DataCollector {
 			JSONArray content = (JSONArray)data.get("content");
 			logger.info("Collection for {} Data Size {} ",new Date(st) , content.length());
 			prepareStatistics(content,collectCustomers(collectAccountIds(content),sessionId,port),st);
+			
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			logger.error("Error {}",e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error {}",e);
 		}
-		
+    	logout(credentials,sessionId);
     }
 
     private void prepareStatistics(JSONArray content,Map<Integer,Customer> customerMap,long st){
@@ -236,16 +227,8 @@ public class DataCollector {
     		logger.error("No Credentials to speak to MoneyBox");
     		return;
     	}
-    	MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),credentials.getPort());
-		try {
-			String sessionId = mBox.login();
-			collectCounterTransactions(from,to,sessionId,credentials.getPort());
-		} catch (ClientProtocolException e) {
-			logger.error("",e);
-
-		} catch (IOException e) {
-			logger.error("",e);
-		}
+		String sessionId = getSessionId(credentials);
+		collectCounterTransactions(from,to,sessionId,credentials.getPort());
 	}
 	
 	private Credentials getCredentials(){
@@ -255,8 +238,35 @@ public class DataCollector {
 			logger.error("No Credentials are provided... we cannot do anything");
 			return null;
 		}
-		return list.get(0);
+		Credentials credential = list.get(0);
+		logger.info("Credential {}",credential);
+		return credential;
 	}
 	
+	private String getSessionId(Credentials credentials){
+		MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),
+    			credentials.getPort());
+		String sessionId = "";
+		try {
+			 sessionId = mBox.login();
+		} catch (ClientProtocolException e) {
+			logger.error("Error {}",e);
+		} catch (IOException e) {
+			logger.error("Error {}",e);
+		}
+		logger.info("Session ID from Money Box {}",sessionId);
+		return sessionId;
+	}
 	
+	private void logout(Credentials credentials, String sessionId){
+		MoneyBoxLogout logout = new MoneyBoxLogout(credentials.getUserName(),sessionId,credentials.getPort());
+		try {
+			logout.execute();
+		} catch (ClientProtocolException e) {
+			logger.error("Error {}",e);
+		} catch (IOException e) {
+			logger.error("Error {}",e);
+		}
+		logger.info("Session with {} for user {} is logged out",sessionId,credentials.getUserName());
+	}
 }

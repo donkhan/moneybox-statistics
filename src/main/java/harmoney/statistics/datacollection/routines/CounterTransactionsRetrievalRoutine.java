@@ -12,8 +12,8 @@ import org.apache.http.HttpResponse;
 
 public class CounterTransactionsRetrievalRoutine extends MoneyBoxGet{
 	
-	public CounterTransactionsRetrievalRoutine(Credentials credentials){
-		super(credentials.getUserName(), credentials.getPassword(), credentials.getPort());
+	public CounterTransactionsRetrievalRoutine(Credentials credentials,String sessionId){
+		super(credentials.getUserName(), sessionId, credentials.getPort());
 	}
 	
 	private long st;

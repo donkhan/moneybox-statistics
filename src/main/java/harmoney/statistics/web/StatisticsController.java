@@ -80,9 +80,12 @@ public class StatisticsController {
     			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
     }
 	
-	@RequestMapping(value = "/update-credentials", method = RequestMethod.POST, headers = "Accept=application/json", 
+	@RequestMapping(value = "/update-credentials", method = RequestMethod.POST, 
+			headers = "Accept=application/json", 
     		produces = "application/json")
-	public Response updateCredentials(@RequestBody final Credentials credentials,HttpServletRequest request) {
+	@CrossOrigin
+	public Response updateCredentials(@RequestBody final Credentials credentials,
+			HttpServletRequest request) {
 		if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
     	}
@@ -96,6 +99,7 @@ public class StatisticsController {
     
 	@RequestMapping(value = "/tran-statistics/take-backup", method = RequestMethod.GET, headers = "Accept=application/json", 
     		produces = "application/json")
+	@CrossOrigin
 	public Response takeBackup(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
 		if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
@@ -108,6 +112,7 @@ public class StatisticsController {
 	
     @RequestMapping(value = "/tran-statistics/counter/download-report", method = RequestMethod.GET, headers = "Accept=application/json", 
     		produces = "application/json")
+    @CrossOrigin
 	public Response downloadReport(HttpSession session,HttpServletRequest request, HttpServletResponse response) {
     	if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();

@@ -26,5 +26,7 @@ public class Credentials {
 		this.password = password;
 	}
 	
-	
+	public String toString(){
+		return "User Name : " + userName + " Password " + password + " Port " + port;
+	}
 }
