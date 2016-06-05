@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+	<!--
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <logger name="org.springframework.web" level="DEBUG"/>
+	-->
+	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.rolling.RollingFileAppender"> 
+		<file>logs/statistics-service.log</file>
+    	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      	<fileNamePattern>logs/statistics-service.%d{yyyy-MM-dd}.log</fileNamePattern>
+    	  	<maxHistory>365</maxHistory>
+    	</rollingPolicy>
+		 
+		<encoder>
+			<pattern>
+				%d{yyyy-MM-dd HH:mm:ss.SSS}  %-5level %X{WEB_REQUEST_ID} %X{WEB_SESSION_USER_ID} %logger{5} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+	<logger name="harmoney" level="INFO" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+</configuration>
