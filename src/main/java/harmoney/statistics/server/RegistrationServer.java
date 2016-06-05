@@ -30,8 +30,6 @@ public class RegistrationServer {
 				socket.receive(packet);
 				String data = new String(packet.getData());
 				JSONObject jsonContent = getJSONObject(data.trim());
-				logger.info("{}",jsonContent);
-				
 				InetAddress IPAddress = packet.getAddress();
                 int receivedPort = packet.getPort();
                 String token = UUID.randomUUID().toString();
@@ -55,7 +53,6 @@ public class RegistrationServer {
 	}
 
 	private JSONObject getJSONObject(String message){
-		logger.info("Message {}",message);
 		try {
 			JSONObject jsonObject = (JSONObject)parser.parse(message);
 			return jsonObject;

@@ -89,7 +89,7 @@ public class StatisticsController {
 		if(!isAuthenticatedRequest(request)){
     		return Response.serverError().build();
     	}
-
+		logger.info("Requested to update the credentials {}",credentials);
 		credentialsRepository.deleteAll();
 		credentialsRepository.save(credentials);
 		

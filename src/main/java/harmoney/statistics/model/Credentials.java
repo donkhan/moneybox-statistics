@@ -40,6 +40,7 @@ public class Credentials {
 	}
 	
 	public String toString(){
-		return "User Name : " + userName + " Password " + password + " Port " + port;
+		return "User Name : " + userName + " Password : " + password + " Port : " + port  
+				+ " Registration Port : " + registrationServerPort;
 	}
 }
