@@ -114,7 +114,6 @@ public class DataCollector {
 			routine.setSt(st);
 			HttpResponse response = routine.execute();
 			StringBuffer buffer = routine.getContent(response);
-			logger.error("Content {}",buffer.toString());
 			JSONObject object = new JSONObject(buffer.toString());
 			JSONObject data = (JSONObject)object.get("data");
 			JSONArray content = (JSONArray)data.get("content");

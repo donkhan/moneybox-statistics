@@ -133,7 +133,7 @@ public class StatisticsController {
 			return Response.ok().entity(csc).header("Access-Control-Allow-Origin", "*")
 	    			.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").build();
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.error("Client Closed Unexpectedly");
 		}
 		return Response.ok().build();
 	}
@@ -205,9 +205,12 @@ public class StatisticsController {
     	if(request.getParameter("branchId") != null){
     		long branchId = Long.parseLong(request.getParameter("branchId"));
     		if(branchId != -1){
+    			logger.info("Branch ID criteria is set");
     			Criteria branchCriteria = Criteria.where("branchId").is(branchId);
     			criteria.andOperator(branchCriteria);
     		}
+    	}else{
+    		logger.info("Query for All Branches");
     	}
     	
     	TypedAggregation<CounterTransaction> aggregation = newAggregation(CounterTransaction.class,
@@ -235,10 +238,12 @@ public class StatisticsController {
 		if(bo instanceof BasicBSONList){
 			BasicBSONList  bbl = (BasicBSONList) bo;
 			int size = bbl.size();
+			logger.info("Size of BSON List {}",size);
 			for(int i = 0;i<size;i++){
 				BSONObject b = (BSONObject)bbl.get(i);
 				BSONObject id = (BSONObject) b.get("_id");
 				String country = (String)id.get("country");
+				logger.info("Country {}",country);
 				CountryStatistics cs;
 				if(!map.containsKey(country)){
 					cs = new CountryStatistics();
