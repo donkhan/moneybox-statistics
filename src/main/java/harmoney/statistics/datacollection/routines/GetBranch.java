@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 public class GetBranch extends MoneyBoxGet{
 
 	private int branch;
-	public GetBranch(String userName, String sessionId, int port,int branch) {
-		super(userName, sessionId, port);
+	public GetBranch(String userName, String sessionId, String serverIP,int port,int branch) {
+		super(userName, sessionId, serverIP,port);
 		this.branch = branch;
 	}
 

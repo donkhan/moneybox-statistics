@@ -12,14 +12,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 public abstract class MoneyBoxGet {
-
-	private String server = "localhost";
-	private int port = 0;
 	
-	protected String getServer() {
-		return server;
+	protected String getServer(){
+		return serverIP;
 	}
-
 	protected int getPort(){
 		return port;
 	}
@@ -43,10 +39,14 @@ public abstract class MoneyBoxGet {
 	private String userName;
 	private String sessionId;
 	
-	public MoneyBoxGet(String userName,String sessionId,int port){
+	private int port;
+	private String serverIP;
+	
+	public MoneyBoxGet(String userName,String sessionId,String serverIP,int port){
 		this.userName = userName;
 		this.sessionId = sessionId;
 		this.port = port;
+		this.serverIP = serverIP;
 	}
 
 	

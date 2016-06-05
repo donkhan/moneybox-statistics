@@ -19,12 +19,12 @@ public class RegistrationServer {
 	
 	final Logger logger = LoggerFactory.getLogger(RegistrationServer.class);
 	private JSONParser parser = new JSONParser();
-	private static int PORT = 3333;
+	private int port = 3332;
 	
 	public void start() {
 		try {
-			DatagramSocket socket = new DatagramSocket(PORT);
-			logger.info("Registration Server is ready and listening in port " + PORT);
+			DatagramSocket socket = new DatagramSocket(port);
+			logger.info("Registration Server is ready and listening in port " + port);
 			for (;;) {
 				DatagramPacket packet = new DatagramPacket(	new byte[PACKETSIZE], PACKETSIZE);
 				socket.receive(packet);
@@ -46,6 +46,14 @@ public class RegistrationServer {
 		}
 	}
 	
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
 	private JSONObject getJSONObject(String message){
 		logger.info("Message {}",message);
 		try {

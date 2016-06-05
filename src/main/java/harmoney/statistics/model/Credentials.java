@@ -5,8 +5,21 @@ public class Credentials {
 	private String userName;
 	private String password;
 	private int port;
+	private String serverIP;
+	private int registrationServerPort;
 	
-	
+	public int getRegistrationServerPort() {
+		return registrationServerPort;
+	}
+	public void setRegistrationServerPort(int registrationServerPort) {
+		this.registrationServerPort = registrationServerPort;
+	}
+	public String getServerIP() {
+		return serverIP;
+	}
+	public void setServerIP(String serverIP) {
+		this.serverIP = serverIP;
+	}
 	public int getPort() {
 		return port;
 	}

@@ -15,11 +15,13 @@ public class MoneyBoxLogin extends MoneyBoxPost{
 	private String userName;
 	private String passWord;
 	private int port;
+	private String serverIP;
 	
-	public MoneyBoxLogin(String userName,String passWord,int port){
+	public MoneyBoxLogin(String userName,String passWord,String serverIP,int port){
 		this.userName = userName;
 		this.passWord = passWord;
 		this.port = port;
+		this.serverIP = serverIP;
 	}
 	
 	@Override
@@ -65,5 +67,10 @@ public class MoneyBoxLogin extends MoneyBoxPost{
 	@Override
 	protected int getPort() {
 		return port;
+	}
+
+	@Override
+	protected String getServer() {
+		return serverIP;
 	}
 }

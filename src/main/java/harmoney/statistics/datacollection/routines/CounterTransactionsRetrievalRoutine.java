@@ -2,18 +2,11 @@ package harmoney.statistics.datacollection.routines;
 
 import harmoney.statistics.model.Credentials;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import org.apache.http.HttpResponse;
-
 
 public class CounterTransactionsRetrievalRoutine extends MoneyBoxGet{
 	
 	public CounterTransactionsRetrievalRoutine(Credentials credentials,String sessionId){
-		super(credentials.getUserName(), sessionId, credentials.getPort());
+		super(credentials.getUserName(), sessionId, credentials.getServerIP(),credentials.getPort());
 	}
 	
 	private long st;

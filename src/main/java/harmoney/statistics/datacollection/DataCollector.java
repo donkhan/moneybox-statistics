@@ -63,13 +63,13 @@ public class DataCollector {
     	}
     	
     	String sessionId = getSessionId(credentials);
-    	runBackUp(fourYearsBack,yesterday,sessionId,credentials.getPort());
+    	runBackUp(fourYearsBack,yesterday,sessionId,credentials.getServerIP(),credentials.getPort());
     	logout(credentials,sessionId);
     }
     
-    private void runBackUp(Calendar fourYearsBack, Calendar yesterday,String sessionId,int port){
+    private void runBackUp(Calendar fourYearsBack, Calendar yesterday,String sessionId,String serverIP,int port){
     	while(fourYearsBack.before(yesterday)){
-    		collectCounterTransactions(fourYearsBack.getTimeInMillis(),fourYearsBack.getTimeInMillis() + 24*60*60*1000-1,sessionId,port);
+    		collectCounterTransactions(fourYearsBack.getTimeInMillis(),fourYearsBack.getTimeInMillis() + 24*60*60*1000-1,sessionId,serverIP,port);
     		fourYearsBack.add(Calendar.DATE, 1);
     	}
     }
@@ -89,13 +89,14 @@ public class DataCollector {
     	calendar.set(Calendar.MINUTE,0);
     	calendar.set(Calendar.HOUR_OF_DAY,0);
     	calendar.add(Calendar.DATE,-1);
-    	collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,sessionId,credentials.getPort());
+    	collectCounterTransactions(calendar.getTimeInMillis(),calendar.getTimeInMillis() + 24*60*60*1000-1,
+    			sessionId,credentials.getServerIP(),credentials.getPort());
     	logout(credentials,sessionId);
     }
 
     final Logger logger = LoggerFactory.getLogger(DataCollector.class);
     
-    public void collectCounterTransactions(long st,long en,String sessionId,int port){
+    public void collectCounterTransactions(long st,long en,String sessionId,String serverIP,int port){
     	if(sessionId.equals("")){
     		logger.error("Session Id is null. Check credentials ...");
     		return;
@@ -118,7 +119,7 @@ public class DataCollector {
 			JSONObject data = (JSONObject)object.get("data");
 			JSONArray content = (JSONArray)data.get("content");
 			logger.info("Collection for {} Data Size {} ",new Date(st) , content.length());
-			prepareStatistics(content,collectCustomers(collectAccountIds(content),sessionId,port),st);
+			prepareStatistics(content,collectCustomers(collectAccountIds(content),sessionId,serverIP,port),st);
 			
 		} catch (ClientProtocolException e) {
 			logger.error("Error {}",e);
@@ -164,10 +165,10 @@ public class DataCollector {
 		return accountIds;
 	}
 
-	private Map<Integer,Customer> collectCustomers(Set<Integer> accountIds,String sessionId,int port) {
+	private Map<Integer,Customer> collectCustomers(Set<Integer> accountIds,String sessionId,String serverIP,int port) {
 		Map<Integer,Customer> customers = new HashMap<Integer,Customer>();
 		for(Integer accountId : accountIds){
-			CustomerCollectionRoutine routine = new CustomerCollectionRoutine("sadmin",sessionId,accountId,port);
+			CustomerCollectionRoutine routine = new CustomerCollectionRoutine("sadmin",sessionId,accountId,serverIP,port);
 			try {
 				HttpResponse response = routine.execute();
 				StringBuffer buffer = routine.getContent(response);
@@ -232,7 +233,7 @@ public class DataCollector {
     		return;
     	}
 		String sessionId = getSessionId(credentials);
-		collectCounterTransactions(from,to,sessionId,credentials.getPort());
+		collectCounterTransactions(from,to,sessionId,credentials.getServerIP(),credentials.getPort());
 		logout(credentials,sessionId);
 	}
 	
@@ -250,7 +251,7 @@ public class DataCollector {
 	
 	private String getSessionId(Credentials credentials){
 		MoneyBoxLogin mBox = new MoneyBoxLogin(credentials.getUserName(),credentials.getPassword(),
-    			credentials.getPort());
+				credentials.getServerIP(),credentials.getPort());
 		String sessionId = "";
 		try {
 			 sessionId = mBox.login();
@@ -264,7 +265,8 @@ public class DataCollector {
 	}
 	
 	private void logout(Credentials credentials, String sessionId){
-		MoneyBoxLogout logout = new MoneyBoxLogout(credentials.getUserName(),sessionId,credentials.getPort());
+		MoneyBoxLogout logout = new MoneyBoxLogout(credentials.getUserName(),sessionId,
+				credentials.getServerIP(),credentials.getPort());
 		try {
 			logout.execute();
 		} catch (ClientProtocolException e) {
@@ -288,7 +290,8 @@ public class DataCollector {
 			logger.error("Credentials are wrong");
 			return "";
 		}
-		GetBranch gb = new GetBranch(credentials.getUserName(),sessionId,credentials.getPort(),branchId);
+		GetBranch gb = new GetBranch(credentials.getUserName(),sessionId,
+				credentials.getServerIP(),credentials.getPort(),branchId);
 		return gb.getBranchName();
 	}
 }

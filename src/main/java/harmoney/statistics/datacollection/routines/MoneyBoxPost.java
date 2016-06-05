@@ -11,11 +11,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 public abstract class MoneyBoxPost {
 
-	private String server = "localhost";
 	
-	protected String getServer(){
-		return server;
-	}
+	protected abstract String getServer();
 	
 	protected abstract int getPort();
 	

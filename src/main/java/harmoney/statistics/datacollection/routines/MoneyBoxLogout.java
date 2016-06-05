@@ -10,8 +10,8 @@ public class MoneyBoxLogout extends MoneyBoxGet{
 		return "/harmoney2/sessionService/logout";
 	}
 	
-	public MoneyBoxLogout(String userName,String sessionId,int port){
-		super(userName,sessionId,port);
+	public MoneyBoxLogout(String userName,String sessionId,String serverIP,int port){
+		super(userName,sessionId,serverIP,port);
 	}
 
 	public void print(HttpResponse response) throws IOException{
