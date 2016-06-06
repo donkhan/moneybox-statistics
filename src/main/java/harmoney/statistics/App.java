@@ -1,9 +1,9 @@
 package harmoney.statistics;
 
 
+import harmoney.server.RegistrationServer;
 import harmoney.statistics.model.Credentials;
 import harmoney.statistics.repository.CredentialsRepository;
-import harmoney.statistics.server.RegistrationServer;
 
 import java.util.List;
 

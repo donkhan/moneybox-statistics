@@ -4,12 +4,12 @@ package harmoney.statistics.web;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import harmoney.model.SessionMap;
 import harmoney.statistics.datacollection.DataCollector;
 import harmoney.statistics.model.CounterTransaction;
 import harmoney.statistics.model.CountryStatistics;
 import harmoney.statistics.model.CountryStatisticsCollection;
 import harmoney.statistics.model.Credentials;
-import harmoney.statistics.model.SessionMap;
 import harmoney.statistics.repository.CounterTransactionRepository;
 import harmoney.statistics.repository.CredentialsRepository;
 
