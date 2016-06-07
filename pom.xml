@@ -97,28 +97,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-    			<groupId>org.apache.maven.plugins</groupId>
-    			<artifactId>maven-install-plugin</artifactId>
-    			<version>2.4</version>
-    			<executions>
-        			<execution>
-            			<phase>install</phase>
-            			<goals>
-                			<goal>install-file</goal>
-            			</goals>
-            			<configuration>
-                			<groupId>moneybox-libs</groupId>
-                			<artifactId>moneybox-libs</artifactId>
-                			<version>0.1</version>
-                			<packaging>jar</packaging>
-                			<file>${basedir}\..\moneybox-libs\target\moneybox-libs-0.1.jar</file>
-            			</configuration>
-        			</execution>
-    			</executions>
-			</plugin>
-	
-        </plugins>
+   	</plugins>         
    </build>
    
    <repositories>
@@ -127,10 +106,6 @@
             <name>Spring Releases</name>
             <url>https://repo.spring.io/libs-release</url>
         </repository>
-        <repository>
-    	 	<id>my-local-repo</id>
-    		<url>file://${basedir}/../myrepo</url>
-  		</repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
